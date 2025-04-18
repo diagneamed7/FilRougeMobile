@@ -1,7 +1,6 @@
 // models/Categorie.ts
-
 export interface ICategorie {
-  idCategorie: number;
+  id: number;
   nom: string;
   description: string;
   image: string;

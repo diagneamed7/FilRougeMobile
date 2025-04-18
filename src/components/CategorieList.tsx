@@ -1,4 +1,3 @@
-// components/CategorieList.tsx
 import React from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { ICategorie } from '../models/Categorie';
@@ -9,13 +8,13 @@ interface CategorieListProps {
 
 const CategorieList: React.FC<CategorieListProps> = ({ categories }) => {
     return (
-        <View style={styles.container} >
+        <View style={styles.container}>
             <FlatList
-                data={categories.map(c => c.id)} // on extrait directement l’objet dans "id"
-                keyExtractor={(item) => item.idCategorie.toString()}
+                data={categories} // Utilisation des catégories passées en props
+                keyExtractor={(item) => item.id.idCategorie.toString()} // Correction : accès à id.idCategorie
                 renderItem={({ item }) => (
                     <View style={styles.item}>
-                        <Text style={styles.text}>{item.nom}</Text>
+                        <Text style={styles.text}>{item.id.nom}</Text> {/* Correction : accès à item.id.nom */}
                     </View>
                 )}
             />

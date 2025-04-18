@@ -42,7 +42,7 @@ const CategoriesActivity: React.FC = () => {
       </View>
     );
   }
-
+  console.log("Catégories reçues:", categories);  // Vérifie ici
   return <CategorieList categories={categories} />;
 };
 
