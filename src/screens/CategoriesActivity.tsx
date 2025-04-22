@@ -16,7 +16,7 @@ const CategoriesActivity: React.FC = () => {
         const categoriesData = await getCategories();
         setCategories(categoriesData);
       } catch (err) {
-        setError('Erreur lors du chargement des catégories');
+        setError(`Erreur lors du chargement des catégories : ${err.message}`);
       } finally {
         setLoading(false);
       }
