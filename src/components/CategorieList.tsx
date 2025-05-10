@@ -10,11 +10,11 @@ const CategorieList: React.FC<CategorieListProps> = ({ categories }) => {
     return (
         <View style={styles.container}>
             <FlatList
-                data={categories} // Utilisation des catégories passées en props
-                keyExtractor={(item) => item.id.idCategorie.toString()} // Correction : accès à id.idCategorie
+                data={categories}
+                keyExtractor={(item) => item.nom}
                 renderItem={({ item }) => (
                     <View style={styles.item}>
-                        <Text style={styles.text}>{item.id.nom}</Text> {/* Correction : accès à item.id.nom */}
+                        <Text style={styles.text}>{item.nom}</Text>
                     </View>
                 )}
             />
