@@ -40,16 +40,28 @@ export const getCategories = async (): Promise<ICategorie[]> => {
     }
 };
   
-export const createCategorie = async (formData) => {
+export const createCategorie = async (formData: FormData): Promise<ICategorie> => {
+    console.log('Tentative de création de catégorie avec les données:', formData);
     try {
-      const response = await axios.post(API_URL, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      
+        console.log('Envoi de la requête POST...');
+        const response = await axios.post<ICategorie>(API_URL, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            timeout: 30000, // 30 secondes pour l'upload d'image
+        });
+        console.log('Réponse reçue:', response.status, response.data);
+        return response.data;
     } catch (error) {
-      console.error("Erreur lors de la création de la catégorie", error);
-      throw error;
+        console.error("Erreur détaillée lors de la création de la catégorie:", error);
+        if (axios.isAxiosError(error)) {
+            if (error.response) {
+                throw new Error(`Erreur serveur: ${error.response.status} - ${error.response.data}`);
+            }
+            if (error.request) {
+                throw new Error('Pas de réponse du serveur. Vérifiez votre connexion.');
+            }
+        }
+        throw new Error('Une erreur est survenue lors de la création de la catégorie');
     }
 };

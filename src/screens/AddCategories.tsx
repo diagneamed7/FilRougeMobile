@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, Image, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, TextInput, Button, Text, Image, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { createCategorie } from '../services/CategorieService';
-import * as ImagePicker from 'react-native-image-picker';
-import axios from 'axios';
+import * as ImagePicker from 'expo-image-picker';
+import { useNavigation } from '@react-navigation/native';
+import { NavigationProp } from '../types/navigation';
 
 interface ImageType {
   uri: string;
@@ -15,42 +16,46 @@ const AddCategorieScreen = () => {
   const [description, setDescription] = useState('');
   const [image, setImage] = useState<ImageType | null>(null);
   const [loading, setLoading] = useState(false);
+  const navigation = useNavigation<NavigationProp>();
 
-  const handleChooseImage = () => {
-    ImagePicker.launchImageLibrary(
-      {
-        mediaType: 'photo',
-        includeBase64: false,
-      },
-      (response) => {
-        if (response.didCancel) {
-          console.log('Sélection annulée');
-          return;
-        }
-  
-        if (response.errorCode) {
-          console.log('Erreur :', response.errorMessage);
-          Alert.alert('Erreur', 'Erreur lors du choix de l\'image');
-          return;
-        }
-  
-        if (response.assets && response.assets.length > 0) {
-          const picked = response.assets[0];
-  
-          if (!picked.uri.startsWith('file://')) {
-            console.warn('URI invalide pour FormData:', picked.uri);
-            Alert.alert('Erreur', 'L\'image sélectionnée est invalide pour l\'envoi.');
-            return;
-          }
-  
-          setImage({
-            uri: picked.uri,
-            type: picked.type,
-            fileName: picked.fileName,
-          });
-        }
+  const handleChooseImage = async () => {
+    try {
+      // Demander la permission d'accéder à la galerie
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert('Permission refusée', 'Nous avons besoin de votre permission pour accéder à vos photos.');
+        return;
       }
-    );
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      console.log('Résultat ImagePicker:', result);
+
+      if (result.canceled) {
+        console.log('Sélection annulée');
+        return;
+      }
+
+      if (result.assets && result.assets.length > 0) {
+        const picked = result.assets[0];
+        console.log('Image sélectionnée:', picked);
+
+        setImage({
+          uri: picked.uri,
+          type: 'image/jpeg',
+          fileName: picked.uri.split('/').pop(),
+        });
+      }
+    } catch (error) {
+      console.error('Erreur lors de la sélection de l\'image:', error);
+      Alert.alert('Erreur', 'Une erreur est survenue lors de la sélection de l\'image');
+    }
   };
 
   const validateForm = () => {
@@ -84,17 +89,21 @@ const AddCategorieScreen = () => {
     } as any);
 
     try {
+      console.log('Envoi des données:', formData);
       const response = await createCategorie(formData);
+      console.log('Réponse du serveur:', response);
       Alert.alert('Succès', 'Catégorie ajoutée avec succès');
       // Reset form
       setNom('');
       setDescription('');
       setImage(null);
+      // Retour à la liste des catégories
+      navigation.goBack();
     } catch (error) {
       console.error('Erreur détaillée:', error);
       Alert.alert(
         'Erreur',
-        error.response?.data?.message || 'Une erreur est survenue lors de l\'ajout de la catégorie'
+        error.message || 'Une erreur est survenue lors de l\'ajout de la catégorie'
       );
     } finally {
       setLoading(false);
@@ -130,7 +139,13 @@ const AddCategorieScreen = () => {
         numberOfLines={4}
       />
 
-      <Button title="Choisir une image" onPress={handleChooseImage} />
+      <TouchableOpacity 
+        style={styles.imageButton}
+        onPress={handleChooseImage}
+      >
+        <Text style={styles.imageButtonText}>Choisir une image</Text>
+      </TouchableOpacity>
+
       {image && (
         <Image
           source={{ uri: image.uri }}
@@ -138,12 +153,13 @@ const AddCategorieScreen = () => {
         />
       )}
 
-      <Button 
-        title="Ajouter la catégorie" 
-        onPress={handleSubmit} 
-        color="green"
+      <TouchableOpacity 
+        style={styles.submitButton}
+        onPress={handleSubmit}
         disabled={loading}
-      />
+      >
+        <Text style={styles.submitButtonText}>Ajouter la catégorie</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -180,6 +196,29 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  imageButton: {
+    backgroundColor: '#007AFF',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  imageButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  submitButton: {
+    backgroundColor: 'green',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  submitButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
