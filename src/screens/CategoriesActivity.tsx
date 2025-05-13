@@ -48,6 +48,15 @@ const CategoriesActivity: React.FC = () => {
   console.log("Catégories reçues:", categories);  // Vérifie ici
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Catégories</Text>
+        <TouchableOpacity 
+          style={styles.productsButton}
+          onPress={() => navigation.navigate('Product', { productId: 'all' })}
+        >
+          <Text style={styles.productsButtonText}>Voir tous les produits</Text>
+        </TouchableOpacity>
+      </View>
       <CategorieList categories={categories} />
       <TouchableOpacity 
         style={styles.addButton}
@@ -62,6 +71,28 @@ const CategoriesActivity: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    padding: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  productsButton: {
+    backgroundColor: '#007AFF',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  productsButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,

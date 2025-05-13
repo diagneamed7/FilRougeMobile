@@ -1,16 +1,30 @@
 import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { ICategorie } from '../models/Categorie';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
 
 interface CategorieListProps {
     categories: ICategorie[];
 }
 
 const CategorieList: React.FC<CategorieListProps> = ({ categories }) => {
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
     const getImageUrl = (imageName: string) => {
         const url = `http://192.168.1.53:3000/uploads/${imageName}`;
         console.log('URL de l\'image:', url);
         return url;
+    };
+
+    const handleCategoryPress = (category: ICategorie) => {
+        console.log('Catégorie sélectionnée:', category);
+        if (!category.id) {
+            console.error('La catégorie n\'a pas d\'ID:', category);
+            return;
+        }
+        navigation.navigate('Product', { productId: category.id });
     };
 
     return (
@@ -19,7 +33,7 @@ const CategorieList: React.FC<CategorieListProps> = ({ categories }) => {
                 data={categories}
                 keyExtractor={(item) => item.nom}
                 renderItem={({ item }) => {
-                    console.log('Rendu de la catégorie:', item);
+                    console.log('Rendu de la catégorie complète:', JSON.stringify(item, null, 2));
                     return (
                         <View style={styles.item}>
                             <Image 
@@ -30,6 +44,12 @@ const CategorieList: React.FC<CategorieListProps> = ({ categories }) => {
                             <View style={styles.textContainer}>
                                 <Text style={styles.title}>{item.nom}</Text>
                                 <Text style={styles.description}>{item.description}</Text>
+                                <TouchableOpacity 
+                                    style={styles.productsButton}
+                                    onPress={() => handleCategoryPress(item)}
+                                >
+                                    <Text style={styles.productsButtonText}>Voir les produits</Text>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     );
@@ -66,7 +86,7 @@ const styles = StyleSheet.create({
         height: 60,
         borderRadius: 30,
         marginRight: 15,
-        backgroundColor: '#ddd', // Couleur de fond pour voir la zone de l'image
+        backgroundColor: '#ddd',
     },
     textContainer: {
         flex: 1,
@@ -79,6 +99,18 @@ const styles = StyleSheet.create({
     description: {
         fontSize: 14,
         color: '#666',
+        marginBottom: 10,
+    },
+    productsButton: {
+        backgroundColor: '#007AFF',
+        padding: 8,
+        borderRadius: 5,
+        alignSelf: 'flex-start',
+    },
+    productsButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
     },
 });
 
