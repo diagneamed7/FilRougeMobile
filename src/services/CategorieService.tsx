@@ -17,9 +17,17 @@ export const getCategories = async (): Promise<ICategorie[]> => {
     console.log('Tentative de connexion à:', API_URL);
     try {
         console.log('Envoi de la requête GET...');
-        const response = await axiosInstance.get<ICategorie[]>(API_URL);
+        const response = await axiosInstance.get(API_URL);
         console.log('Réponse reçue:', response.status);
-        return response.data;
+        // Transformer les données pour utiliser _id comme id
+        const categories = response.data.map((category: any) => ({
+            id: category._id,
+            nom: category.nom,
+            description: category.description,
+            image: category.image
+        }));
+        console.log('Catégories transformées:', categories);
+        return categories;
     } catch (error) {
         console.log('Erreur détaillée:', error);
         if (axios.isAxiosError(error)) {
@@ -44,14 +52,20 @@ export const createCategorie = async (formData: FormData): Promise<ICategorie> =
     console.log('Tentative de création de catégorie avec les données:', formData);
     try {
         console.log('Envoi de la requête POST...');
-        const response = await axios.post<ICategorie>(API_URL, formData, {
+        const response = await axios.post(API_URL, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
             timeout: 30000, // 30 secondes pour l'upload d'image
         });
         console.log('Réponse reçue:', response.status, response.data);
-        return response.data;
+        // Transformer la réponse pour utiliser _id comme id
+        return {
+            id: response.data._id,
+            nom: response.data.nom,
+            description: response.data.description,
+            image: response.data.image
+        };
     } catch (error) {
         console.error("Erreur détaillée lors de la création de la catégorie:", error);
         if (axios.isAxiosError(error)) {

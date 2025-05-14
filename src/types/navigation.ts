@@ -5,7 +5,11 @@ export type RootStackParamList = {
     Home: undefined;
     Categories: undefined;
     AddCategories: undefined;
+<<<<<<< HEAD
 
+=======
+    Product: { productId: string };
+>>>>>>> 4cd6a8b68325256e46af1ba83948a779e6f6cb19
 };
 
 export type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
