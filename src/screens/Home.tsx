@@ -13,7 +13,7 @@ import {
 import Carousel from 'react-native-reanimated-carousel';
 
 const { width } = Dimensions.get('window');
-
+// TEST OK OK OK
 const promoData = [
   { id: '1', image: require('../types/1744884365062.png'), link: 'https://promo1.com' },
   { id: '2', image: require('../types/1744884365062.png'), link: 'https://promo2.com' },
