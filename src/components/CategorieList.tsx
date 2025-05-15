@@ -19,11 +19,16 @@ const CategorieList: React.FC<CategorieListProps> = ({ categories }) => {
     };
 
     const handleCategoryPress = (category: ICategorie) => {
-        console.log('Catégorie sélectionnée:', category);
+        console.log('Catégorie sélectionnée (détaillée):', JSON.stringify(category, null, 2));
+        
+        // Vérifier si l'ID existe
         if (!category.id) {
-            console.error('La catégorie n\'a pas d\'ID:', category);
+            console.error('La catégorie n\'a pas d\'ID:', JSON.stringify(category, null, 2));
             return;
         }
+
+        // Navigation vers l'écran des produits avec l'ID de la catégorie
+        console.log('Navigation vers Product avec ID de catégorie:', category.id);
         navigation.navigate('Product', { productId: category.id });
     };
 
@@ -31,7 +36,7 @@ const CategorieList: React.FC<CategorieListProps> = ({ categories }) => {
         <View style={styles.container}>
             <FlatList
                 data={categories}
-                keyExtractor={(item) => item.nom}
+                keyExtractor={(item) => item.id || item.nom}
                 renderItem={({ item }) => {
                     console.log('Rendu de la catégorie complète:', JSON.stringify(item, null, 2));
                     return (
