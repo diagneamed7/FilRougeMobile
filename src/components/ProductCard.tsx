@@ -15,6 +15,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ name, price, image }) => (
   </View>
 );
 
+
+
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#e3f2fd',

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   View,
   Text,
@@ -22,23 +23,52 @@ const promoData = [
   { id: '3', image: require('../types/1744884365062.png'), link: 'https://promo3.com' },
 ];
 
-const categories = [
-  { id: '1', name: 'Boissons', image: require('../types/1744884365062.png') },
-  { id: '2', name: 'Snacks', image: require('../types/1744884365062.png') },
-  { id: '3', name: 'Épices', image: require('../types/1744884365062.png') },
-  { id: '4', name: 'Épices', image: require('../types/1744884365062.png') },
-  { id: '5', name: 'Épices', image: require('../types/1744884365062.png') },
-  { id: '6', name: 'Épices', image: require('../types/1744884365062.png') },
-  { id: '7', name: 'Épices', image: require('../types/1744884365062.png') },
-];
-const itemWidth = width / 3 - 20;
-const topProduits = [
-  { id: '1', name: 'Vin Rouge', price: '25€', image: require('../types/1744884365062.png') },
-  { id: '2', name: 'Fromage Bio', price: '12€', image: require('../types/1744884365062.png') },
-  { id: '3', name: 'Huile d’olive', price: '18€', image: require('../types/1744884365062.png') },
-];
-
 const Home = () => {
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [errorCategories, setErrorCategories] = useState(null);
+
+  const [topProduits, setTopProduits] = useState([]);
+  const [loadingProduits, setLoadingProduits] = useState(true);
+  const [errorProduits, setErrorProduits] = useState(null);
+
+  useEffect(() => {
+    axios.get('http://192.168.114.152:3000/categories')
+      .then(response => {
+        const formatted = response.data.map(item => ({
+          id: item.idCategorie,
+          name: item.nom,
+          image: { uri: `http://192.168.114.152:3000/uploads/${item.image}` },
+        }));
+        setCategories(formatted);
+        setLoadingCategories(false);
+      })
+      .catch(error => {
+        console.error('Erreur lors du chargement des catégories :', error);
+        setErrorCategories('Impossible de charger les catégories');
+        setLoadingCategories(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    axios.get('http://192.168.114.152:3000/produits')
+      .then(response => {
+        const formatted = response.data.map(item => ({
+          id: item.idProduit,
+          name: item.nom,
+          price: `${item.prix}€`,
+          image: { uri: `http://192.168.114.152:3000/uploads/${item.image}` },
+        }));
+        setTopProduits(formatted);
+        setLoadingProduits(false);
+      })
+      .catch(err => {
+        console.error('Erreur lors du chargement des produits:', err);
+        setErrorProduits('Impossible de charger les produits');
+        setLoadingProduits(false);
+      });
+  }, []);
+
   return (
     <ScrollView style={styles.container}>
       {/* Header avec barre de recherche */}
@@ -52,50 +82,63 @@ const Home = () => {
       </View>
 
       {/* Carrousel de promotions */}
-              <View style={styles.carouselContainer}>
-      <Carousel
-        loop
-        autoPlay
-        width={width}
-        height={180}
-        data={promoData}
-        scrollAnimationDuration={1000}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => console.log('Promo vers:', item.link)}
-            style={styles.carouselWrapper}
-          >
-            <Image source={item.image} style={styles.carouselImage} />
-            <Text style={styles.carouselArrow}>→</Text>
-          </TouchableOpacity>
-        )}
-      />
-    </View>
+      <View style={styles.carouselContainer}>
+        <Carousel
+          loop
+          autoPlay
+          width={width}
+          height={180}
+          data={promoData}
+          scrollAnimationDuration={1000}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => console.log('Promo vers:', item.link)}
+              style={styles.carouselWrapper}
+            >
+              <Image source={item.image} style={styles.carouselImage} />
+              <Text style={styles.carouselArrow}>→</Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
 
       {/* Catégories */}
       <Text style={styles.sectionTitle}>Catégories</Text>
-      <FlatList
-        data={categories}
-        horizontal
-        keyExtractor={(item) => item.id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingLeft: 16 }}
-        renderItem={({ item }) => (
-          <CategoryCard name={item.name} image={item.image} />
-        )}
-      />
+      {loadingCategories ? (
+        <Text style={{ marginLeft: 16 }}>Chargement...</Text>
+      ) : errorCategories ? (
+        <Text style={{ marginLeft: 16, color: 'red' }}>{errorCategories}</Text>
+      ) : (
+        <FlatList
+          data={categories}
+          horizontal
+          keyExtractor={(item) => item.id.toString()}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingLeft: 16 }}
+          renderItem={({ item }) => (
+            <CategoryCard key={item.id} name={item.name} image={item.image} />
+          )}
+        />
+      )}
 
       {/* Top Produits */}
       <Text style={styles.sectionTitle}>Top Produits</Text>
-      <FlatList
-        data={topProduits}
-        horizontal
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.productsContainer}
-        renderItem={({ item }) => (
-          <ProductCard name={item.name} price={item.price} image={item.image} />
-        )}
-      />
+      {loadingProduits ? (
+        <Text style={{ marginLeft: 16 }}>Chargement...</Text>
+      ) : errorProduits ? (
+        <Text style={{ marginLeft: 16, color: 'red' }}>{errorProduits}</Text>
+      ) : (
+        <FlatList
+          data={topProduits}
+          horizontal
+          keyExtractor={(item) => item.id.toString()}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.productsContainer}
+          renderItem={({ item }) => (
+            <ProductCard key={item.id} name={item.name} price={item.price} image={item.image} />
+          )}
+        />
+      )}
     </ScrollView>
   );
 };
@@ -127,10 +170,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   carouselContainer: {
-    backgroundColor: '#f5f0e6', // beige doux
+    backgroundColor: '#f5f0e6',
     paddingVertical: 12,
-    margin : 20,
-    borderRadius : 5,
+    margin: 20,
+    borderRadius: 5,
   },
   carouselWrapper: {
     justifyContent: 'center',
@@ -141,7 +184,6 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 12,
     alignSelf: 'center',
-
   },
   carouselArrow: {
     position: 'absolute',
@@ -169,11 +211,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingBottom: 30,
   },
-  carouselItem: {
-    marginHorizontal: 10,
-    borderRadius: 12,
-    overflow: 'hidden',
-  }
 });
 
 export default Home;
