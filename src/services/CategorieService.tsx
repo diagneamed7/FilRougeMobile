@@ -18,15 +18,32 @@ export const getCategories = async (): Promise<ICategorie[]> => {
     try {
         console.log('Envoi de la requête GET...');
         const response = await axiosInstance.get(API_URL);
-        console.log('Réponse reçue:', response.status);
+        console.log('Réponse brute du serveur:', JSON.stringify(response.data, null, 2));
+        
         // Transformer les données pour utiliser _id comme id
-        const categories = response.data.map((category: any) => ({
-            id: category._id,
-            nom: category.nom,
-            description: category.description,
-            image: category.image
-        }));
-        console.log('Catégories transformées:', categories);
+        const categories = response.data.map((category: any) => {
+            console.log('Catégorie avant transformation:', JSON.stringify(category, null, 2));
+            
+            // Vérifier toutes les possibilités d'ID
+            const categoryId = category._id || category.id || category.idCategorie;
+            console.log('ID trouvé:', categoryId);
+            
+            if (!categoryId) {
+                console.error('Aucun ID trouvé pour la catégorie:', category);
+            }
+            
+            const transformedCategory = {
+                id: categoryId,
+                nom: category.nom,
+                description: category.description,
+                image: category.image
+            };
+            
+            console.log('Catégorie après transformation:', JSON.stringify(transformedCategory, null, 2));
+            return transformedCategory;
+        });
+        
+        console.log('Catégories transformées finales:', JSON.stringify(categories, null, 2));
         return categories;
     } catch (error) {
         console.log('Erreur détaillée:', error);

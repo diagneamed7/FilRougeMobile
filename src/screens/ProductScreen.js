@@ -6,26 +6,74 @@ const ProductScreen = ({ route }) => {
   const { productId } = route.params;
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = async () => {
+    try {
+      console.log('Début de la récupération des produits avec ID:', productId);
+      const response = await getProductById(productId);
+      console.log('Données reçues:', response.data);
+      
+      // Vérifier si la réponse est un tableau ou un objet unique
+      const productsData = Array.isArray(response.data) ? response.data : [response.data];
+      console.log('Produits transformés:', productsData);
+      
+      setProducts(productsData);
+      setError(null);
+    } catch (err) {
+      console.error("Erreur lors du chargement du produit:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getProductById(productId);
-        setProducts(Array.isArray(response.data) ? response.data : [response.data]);
-      } catch (err) {
-        console.error("Erreur lors du chargement du produit:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, [productId]);
 
-  if (loading) return <ActivityIndicator size="large" color="#000" />;
-  if (!products.length) return <Text>Produit non trouvé</Text>;
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#000" />
+        <Text>Chargement des produits...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Erreur: {error}</Text>
+        <Button 
+          title="Réessayer" 
+          onPress={fetchData}
+        />
+      </View>
+    );
+  }
+
+  if (!products.length) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text>Aucun produit trouvé</Text>
+        <Button 
+          title="Réessayer" 
+          onPress={fetchData}
+        />
+      </View>
+    );
+  }
 
   const getImageUrl = (imageName) => {
     return `http://192.168.1.53:3000/uploads/${imageName}`;
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(price);
   };
 
   const renderProduct = ({ item }) => (
@@ -34,15 +82,23 @@ const ProductScreen = ({ route }) => {
         <Image 
           source={{ uri: getImageUrl(item.image) }}
           style={styles.image}
+          onError={(error) => console.log('Erreur de chargement de l\'image:', error.nativeEvent.error)}
         />
       )}
       <Text style={styles.title}>{item.nom}</Text>
       <Text style={styles.description}>{item.description}</Text>
       
       <View style={styles.priceContainer}>
-        <Text style={styles.price}>{item.prix}€</Text>
+        <Text style={styles.price}>{formatPrice(item.prix)}</Text>
         <Text style={styles.stock}>En stock: {item.stock}</Text>
       </View>
+
+      {item.categorie && (
+        <View style={styles.categoryContainer}>
+          <Text style={styles.categoryLabel}>Catégorie:</Text>
+          <Text style={styles.categoryName}>{item.categorie.nom}</Text>
+        </View>
+      )}
 
       <Button
         title="Ajouter au panier"
@@ -59,7 +115,7 @@ const ProductScreen = ({ route }) => {
       <FlatList
         data={products}
         renderItem={renderProduct}
-        keyExtractor={(item) => item.idProduit}
+        keyExtractor={(item) => item.idProduit.toString()}
         contentContainerStyle={styles.listContainer}
       />
     </ScrollView>
@@ -70,6 +126,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
   },
   listContainer: {
     padding: 20,
@@ -119,6 +190,22 @@ const styles = StyleSheet.create({
   stock: {
     fontSize: 16,
     color: '#666',
+  },
+  categoryContainer: {
+    marginBottom: 20,
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+  },
+  categoryLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,
+  },
+  categoryName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
   },
 });
 
