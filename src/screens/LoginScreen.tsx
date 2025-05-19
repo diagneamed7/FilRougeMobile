@@ -16,33 +16,37 @@ const LoginScreen = ({ navigation }: any) => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://10.0.2.2:3000/api/auth/login', {
+      const response = await fetch('http://192.168.1.53:3000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, token: mfaCode }),
+        body: JSON.stringify({email, password, token: mfaCode }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erreur de connexion');
-      }
-
-      const data = await response.json();
-      console.log('JWT:', data.token);
-      Alert.alert('Succès', 'Connecté avec succès !');
-
-      // navigation vers écran d'accueil ou autre
-      // navigation.navigate('Home');
-
-    } catch (error: any) {
-      Alert.alert('Erreur', error.message);
+       const responseText = await response.text();
+        console.log('Réponse brute:', responseText);
+      
+      let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      throw new Error('Réponse du serveur invalide');
     }
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Erreur de connexion');
+    }
+
+    console.log('JWT:', data.token);
+    Alert.alert('Succès', 'Connecté avec succès !');
+    navigation.navigate('AccountScreen');
+
+  } catch (error: any) {
+    Alert.alert('Erreur', error.message);
+  };
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Connexion</Text>
-
+  
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -50,16 +54,14 @@ const LoginScreen = ({ navigation }: any) => {
         autoCapitalize="none"
         onChangeText={setEmail}
         value={email}
-      />
-
+        />
       <TextInput
         style={styles.input}
         placeholder="Mot de passe"
         secureTextEntry
         onChangeText={setPassword}
         value={password}
-      />
-
+        />
       <TextInput
         style={styles.input}
         placeholder="Code MFA"

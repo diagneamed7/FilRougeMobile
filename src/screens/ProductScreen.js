@@ -3,6 +3,7 @@ import { View, Text, Button, ActivityIndicator, ScrollView, StyleSheet, FlatList
 import { getProductById } from '../services/productService';
 
 const ProductScreen = ({ route }) => {
+  
   const { productId } = route.params;
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +67,7 @@ const ProductScreen = ({ route }) => {
   }
 
   const getImageUrl = (imageName) => {
-    return `http://192.168.1.53:3000/uploads/${imageName}`;
+    return `http:192.168.1.53:3000/uploads/${imageName}`;
   };
 
   const formatPrice = (price) => {

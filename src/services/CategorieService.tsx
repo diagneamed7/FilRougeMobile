@@ -7,7 +7,7 @@ const API_URL = 'http://192.168.1.53:3000/categories';
 
 // Configuration d'axios avec un timeout plus long
 const axiosInstance = axios.create({
-    timeout: 10000, // 10 secondes
+    timeout: 100000, // 10 secondes
     headers: {
         'Content-Type': 'application/json',
     }
