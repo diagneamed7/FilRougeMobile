@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -14,6 +15,13 @@ import {
 import Carousel from 'react-native-reanimated-carousel';
 import CategoryCard from '../components/CategoryCard';
 import ProductCard from '../components/ProductCard';
+
+import { StackNavigationProp } from '@react-navigation/stack';
+type RootStackParamList = {
+  Home: undefined;
+  ProductSearch: { query: string };
+};
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 const { width } = Dimensions.get('window');
 
@@ -32,13 +40,17 @@ const Home = () => {
   const [loadingProduits, setLoadingProduits] = useState(true);
   const [errorProduits, setErrorProduits] = useState(null);
 
+ 
+  const [search, setSearch] = useState('');
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+
   useEffect(() => {
-    axios.get('http://192.168.114.152:3000/categories')
+    axios.get('http://172.16.0.178:3000/categories')
       .then(response => {
         const formatted = response.data.map(item => ({
           id: item.idCategorie,
           name: item.nom,
-          image: { uri: `http://192.168.114.152:3000/uploads/${item.image}` },
+          image: { uri: `http://172.16.0.178:3000/uploads/${item.image}` },
         }));
         setCategories(formatted);
         setLoadingCategories(false);
@@ -51,13 +63,13 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    axios.get('http://192.168.114.152:3000/produits')
+    axios.get('http://172.16.0.178:3000/produits')
       .then(response => {
         const formatted = response.data.map(item => ({
           id: item.idProduit,
           name: item.nom,
           price: `${item.prix}€`,
-          image: { uri: `http://192.168.114.152:3000/uploads/${item.image}` },
+          image: { uri: `http://172.16.0.178:3000/uploads/${item.image}` },
         }));
         setTopProduits(formatted);
         setLoadingProduits(false);
@@ -74,11 +86,19 @@ const Home = () => {
       {/* Header avec barre de recherche */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>CYNA</Text>
-        <TextInput
-          placeholder="Rechercher"
-          placeholderTextColor="#888"
-          style={styles.searchBar}
-        />
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('ProductSearch', { query: search })}
+        >
+          <TextInput
+            placeholder="Rechercher"
+            placeholderTextColor="#888"
+            style={styles.searchBar}
+            value={search}
+            onChangeText={setSearch}
+            onSubmitEditing={() => navigation.navigate('ProductSearch', { query: search })}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Carrousel de promotions */}

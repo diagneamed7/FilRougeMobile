@@ -11,8 +11,10 @@ import ProductScreen from './src/screens/ProductScreen';
 import { Text, View } from 'react-native';
 import UserStack from './src/navigation/UserNavigator';
 import { getCategories } from './src/services/CategorieService';
+import ProductSearch from './src/screens/ProductSearch';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<any>();
+
 
 function TabNavigator() {
   return (
@@ -36,6 +38,7 @@ function TabNavigator() {
       <Tab.Screen name="Catégories" component={Categories} />
       <Tab.Screen name="Panier" component={Home} />
       <Tab.Screen name="Utilisateur" component={UserStack} />
+      
     </Tab.Navigator>
   );
 }
@@ -64,6 +67,10 @@ export default function App() {
           component={AccountScreen}
           options={{ title: 'Mon compte' }}
         />
+        <Stack.Screen 
+          name="ProductSearch" 
+          component={ProductSearch} 
+          options={{ title: 'Recherche' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

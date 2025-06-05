@@ -26,7 +26,7 @@ const CategoriesActivity: React.FC = () => {
     fetchCategories();
   }, []);
 
-  const getImageUrl = (imageName: string) => `http://192.168.1.53:3000/uploads/${imageName}`;
+  const getImageUrl = (imageName: string) => `http://172.16.0.178:3000/uploads/${imageName}`;
 
   const handleCategoryPress = (category: ICategorie) => {
     if (!category.id) {
