@@ -3,7 +3,7 @@ import axios from 'axios';
 import { ICategorie } from '../models/Categorie';
 
 // URL de ton API REST
-const API_URL = 'http://192.168.1.53:3000/categories';
+const API_URL = 'http://192.168.114.152:3000/categories';
 
 // Configuration d'axios avec un timeout plus long
 const axiosInstance = axios.create({

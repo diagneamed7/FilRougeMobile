@@ -13,7 +13,7 @@ const CategorieList: React.FC<CategorieListProps> = ({ categories }) => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
     const getImageUrl = (imageName: string) => {
-        const url = `http://10.188.228.1:3000/uploads/${imageName}`;
+        const url = `http://172.16.0.196:3000/uploads/${imageName}`;
         console.log('URL de l\'image:', url);
         return url;
     };

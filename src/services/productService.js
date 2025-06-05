@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://192.168.1.53:3000';
+const API_URL = 'http://192.168.114.152:3000';
 
 export const getProductById = async (productId) => {
     try {
